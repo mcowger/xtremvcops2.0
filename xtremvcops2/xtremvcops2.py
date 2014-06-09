@@ -42,16 +42,16 @@ class XtremIO_Connection(object):
         self.options = options
 
     def get_volumes(self):
-        logger.info("Retrieving list of all volumes from XMS")
+        logging.info("Retrieving list of all volumes from XMS")
         try:
             volumes =  self.xtremio.volumes.GET().json()['volumes']
         except Exception as exp:
             raise
-        logger.info("Got %d volumes from XMS" % len(volumes))
+        logging.info("Got %d volumes from XMS" % len(volumes))
         return volumes
 
     def get_volume(self,volume_record):
-        logger.info("Retrieving info for volume: " + volume_record['name'])
+        logging.info("Retrieving info for volume: " + volume_record['name'])
         volume_number = volume_record['href'].rsplit('/',1)[-1]
         try:
             return self.xtremio.volumes(volume_number).GET().json()
@@ -77,10 +77,10 @@ class XtremIO_Connection(object):
             vcops_info = Vcops_Record_Keeper(resourceName='XMS-'+brick_name+"-"+volume['name'],resourceKindKey='XtremeIO-Array',resourceDescription='XtremeIO Array')
             for metric in volume_info['content'].items():
                 if type(metric[1]) in [type(1),type("")]: #Did we find a str or int?
-                    logger.debug("Metric found: brick:volume:metric:value %s:%s:%s:%s" % (brick_name,volume['name'],metric[0],metric[1]))
+                    logging.debug("Metric found: brick:volume:metric:value %s:%s:%s:%s" % (brick_name,volume['name'],metric[0],metric[1]))
                     vcops_info.add_metric_observation(entity_name=volume['name'],metric_name=metric[0],value=str(metric[1]))
             response = vcops_connection.submit_set(vcops_info.first_line,vcops_info.metric_lines)
-            logger.info(response)
+            logging.info(response)
 
 class Vcops_Connection(object):
     def __init__(self,vcops_ip=""):
@@ -89,10 +89,10 @@ class Vcops_Connection(object):
             self.vcops = Vcops(options['--protocol']+ "://" + self.vcops_ip + '/HttpPostAdapter/OpenAPIServlet',verify=False,auth=(options['--vcops_user'],options['--vcops_pass']))
         except Exception as exp:
             raise
-        logger.info("Logging into vcops @ %s as %s" % (self.vcops_ip,options['--vcops_user']))
+        logging.info("Logging into vcops @ %s as %s" % (self.vcops_ip,options['--vcops_user']))
 
     def submit_set(self,first_line,metric_lines):
-        logger.debug("Submitting metrics as user: %s:\n %s" % (options['--vcops_user'],first_line+'\n'+metric_lines[0:500]))
+        logging.debug("Submitting metrics as user: %s:\n %s" % (options['--vcops_user'],first_line+'\n'+metric_lines[0:500]))
         response = self.vcops.POST(data=first_line+'\n'+metric_lines)
         return response
 
@@ -113,13 +113,13 @@ class Vcops_Record_Keeper(object):
     def first_line(self):
 
         first_line = ",".join( ( self.resource_name,'HTTP Post',self.resource_kind_key,self.identifiers,self.resource_description,'','')  )
-        logger.debug("Returning first line: %s" % first_line)
+        logging.debug("Returning first line: %s" % first_line)
         return first_line
 
     def add_metric_observation(self,entity_name,metric_name,alarm_level=0,alarm_message="",value=''):
         metric_string = ','.join((metric_name,'','',str(self.current_time_millis),value,str(alarm_level)))
         self.metrics.append(metric_string)
-        logger.debug("Added metric: %s" % metric_string)
+        logging.debug("Added metric: %s" % metric_string)
 
 
     @property
