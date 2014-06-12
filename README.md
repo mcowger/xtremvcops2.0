@@ -37,3 +37,8 @@ And then fill in what you need
 ```
 python xtremevcops-rest.py X.X.X.X demo demo X.X.X.X --debug_level=INFO
 ```
+
+License: CC-BY-SA
+http://creativecommons.org/licenses/by-sa/4.0/
+
+
